@@ -56,6 +56,8 @@ DBIx::Class::EncodedColumn::Crypt::Scrypt
           encode_column       => 1,
           encode_class        => 'Crypt::Scrypt',
           encode_args         => {
+              cost  => 10,
+              keysz => 64
           },
           encode_check_method => 'check_password',
       }
