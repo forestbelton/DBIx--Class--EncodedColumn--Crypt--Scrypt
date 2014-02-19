@@ -16,7 +16,7 @@ $schema->deploy({});
 
 my $row1 = $schema->resultset('Scrypt')->create({
     hash => 'test'
-});
+})->discard_changes;
 
 ok($row1->scrypt_check('test'))
     or diag('Verification failed');
@@ -26,9 +26,17 @@ ok(not $row1->scrypt_check('test2'))
 
 my $row2 = $schema->resultset('Scrypt')->create({
     hash => 'test'
-});
+})->discard_changes;
 
 ok($row1->hash ne $row2->hash)
     or diag('Hashes not different for two rows with same input');
+
+$row1->hash('test2');
+ok($row1->scrypt_check('test2'))
+    or diag("Failed to change column value via accessor");
+
+$row1->update({ hash => 'test3' })->discard_changes;
+ok($row1->scrypt_check('test3'))
+    or diag("Failed to change column value via update");
 
 done_testing();
