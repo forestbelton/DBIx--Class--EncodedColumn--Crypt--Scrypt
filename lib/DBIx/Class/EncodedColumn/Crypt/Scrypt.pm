@@ -4,9 +4,22 @@ use warnings;
 # ABSTRACT: scrypt support for DBIx::Class::EncodedColumn
 package DBIx::Class::EncodedColumn::Crypt::Scrypt;
 
+# VERSION
+
 use Encode qw(is_utf8 encode_utf8);
 use Crypt::ScryptKDF 0.008 qw(scrypt_hash scrypt_hash_verify
     random_bytes);
+
+sub power_of_2 {
+    my ($x) = @_;
+
+    while($x > 1) {
+        return 0 if $x % 2 == 1;
+        $x /= 2;
+    }
+
+    return $x == 1;
+}
 
 sub make_encode_sub {
     my ($class, $col, $args) = @_;
@@ -16,6 +29,8 @@ sub make_encode_sub {
     $args->{parallel} //= 1;
     $args->{saltsz}   //= 32;
     $args->{keysz}    //= 32;
+
+    die "Cost not a power of 2" unless power_of_2($args->{cost});
 
     sub {
         my ($text) = @_;
